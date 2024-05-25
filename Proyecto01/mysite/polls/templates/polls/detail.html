@@ -1,6 +1,24 @@
-<h1>{{ question.question_text }}</h1>
-<ul>
-  {% for choice in question.choice_set.all %}
-  <li>{{ choice.choice_text }}</li>
-  {% endfor %}
-</ul>
+{# el metodo POST modifica la informacion en el servidor, a diferencia de GET #}
+<form action="{% url 'polls:vote' question.id %}" method="post">
+
+{# csrf sirve para prevenir ataques de Cross Site Request Forgeries #}
+{% csrf_token %}
+
+<fieldset>
+    <legend><h1>{{ question.question_text }}</h1></legend>
+
+    {# imprime un mensaje error si se proporciona la variable error_message #}
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+    {% for choice in question.choice_set.all %}
+        {# el boton radio es el que solo permite seleccionar una opcion #}
+        {# forloop.counter indica cuantas veces el for ha realizado el loop #}
+        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+    {% endfor %}
+
+</fieldset>
+
+{# este el el nombre del boton submit #}
+<input type="submit" value="Vote">
+</form>

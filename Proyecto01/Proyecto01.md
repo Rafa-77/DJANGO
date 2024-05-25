@@ -158,16 +158,58 @@ def detail(request, question_id):
 # Results
 ###########
 
+# 1. Version
 def results(request, question_id):
     response = "You're looking at the results of question %s."
     return HttpResponse(response % question_id)
+
+# 2. Version
+from django.shortcuts import get_object_or_404, render
+
+def results(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    return render(request, "polls/results.html", {"question": question})
 
 ###########
 # Vote
 ###########
 
+# 1. Version
 def vote(request, question_id):
     return HttpResponse("You're voting on question %s." % question_id)
+
+# 2. Version
+
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+
+from .models import Choice, Question
+
+
+def vote(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    try:
+        # request.POST es un diccionario que devuelve strings
+        selected_choice = question.choice_set.get(pk=request.POST["choice"])
+    except (KeyError, Choice.DoesNotExist):
+        # Redisplay the question voting form.
+        return render(
+            request,
+            "polls/detail.html",
+            {
+                "question": question,
+                "error_message": "You didn't select a choice.",
+            },
+        )
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+        # Always return an HttpResponseRedirect after successfully dealing with POST data.
+	    # This prevents data from being posted twice if a user hits the Back button.
+        # reverse funciona igual que la tag "url"
+        return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
+
 ```
 
 ### Polls/urls.py
@@ -177,6 +219,9 @@ def vote(request, question_id):
 
 from django.urls import path
 from . import views
+
+# NameSpacing URL
+app_name = "polls"
 
 urlpatterns = [
     # ex: /polls/
@@ -206,14 +251,15 @@ urlpatterns = [
 
 ### polls/templates/polls/---.html
 
-```html
-<!-- Se crean los Templates utilizados en las vistas -->
+```django
+{# Se crean los Templates utilizados en las vistas #}
 
-<!-- 
-##########    
+{#
+##########
 # INDEX
 ##########
--->
+#}
+
 {% if latest_question_list %}
 <ul>
   {% for question in latest_question_list %}
@@ -224,17 +270,67 @@ urlpatterns = [
 <p>No polls are available.</p>
 {% endif %}
 
-<!-- 
-##########    
+
+{#
+##########
 # DETAIL
 ##########
--->
+#}
+
+{# OLD #}
 <h1>{{ question.question_text }}</h1>
 <ul>
   {% for choice in question.choice_set.all %}
   <li>{{ choice.choice_text }}</li>
   {% endfor %}
 </ul>
+
+
+
+{# NEW: Implementa un form #}
+
+{# el metodo POST modifica la informacion en el servidor, a diferencia de GET #}
+<form action="{% url 'polls:vote' question.id %}" method="post">
+
+{# csrf sirve para prevenir ataques de Cross Site Request Forgeries #}
+{% csrf_token %}
+
+<fieldset>
+    <legend><h1>{{ question.question_text }}</h1></legend>
+
+    {# imprime un mensaje error si se proporciona la variable error_message #}
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+    {% for choice in question.choice_set.all %}
+        {# el boton radio es el que solo permite seleccionar una opcion #}
+        {# forloop.counter indica cuantas veces el for ha realizado el loop #}
+        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+    {% endfor %}
+
+</fieldset>
+
+{# este el el nombre del boton submit #}
+<input type="submit" value="Vote">
+</form>
+
+{#
+##########
+# RESULTS
+##########
+#}
+
+<h1>{{ question.question_text }}</h1>
+
+<ul>
+{% for choice in question.choice_set.all %}
+    <li>{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
+{% endfor %}
+</ul>
+
+<a href="{% url 'polls:detail' question.id %}">Vote again?</a>
+
+
 ```
 
 ### polls/admin.py
@@ -379,4 +475,95 @@ Question.objects.filter(pk=1).update(question_text='some value')
 q.choice_set.create(choice_text="Not much", votes=0)
 q.choice_set.create(choice_text="The sky", votes=0)
 c = q.choice_set.create(choice_text="Just hacking again", votes=0)
+```
+
+## 4. Templates:
+
+Sus componentes son los siguientes:
+
+1. Variables:
+   - Surrounded by **{{** and **}}**.
+   - Dot notation for lookup.
+     - {{ my_dict.key }}
+     - {{ my_object.attribute }}
+     - {{ my_list.0 }}
+
+```django
+My first name is {{ first_name }}. My last name is {{ last_name }}.
+{# RESULTADO: My first name is John. My last name is Doe.#}
+```
+
+2. Tags:
+
+   - Surrounded by **{%** and **%}**.
+   - Accept arguments.
+
+```django
+{% csrf_token %}
+
+<p>Rendered text with {{ pub_date|date:"c" }}</p>
+{% comment "Optional note" %}
+    <p>Commented out text with {{ create_date|date:"c" }}</p>
+{% endcomment %}
+```
+
+3. Filters:
+   - Use pipe **"|"**
+   - Transform values of variables and tags
+
+```django
+{'django': 'the web framework for perfectionists with deadlines'}
+{{ django|title }}
+{# RESPUESTA: The Web Framework For Perfectionists With Deadlines#}
+```
+
+4. Comments:
+   - Surrounded by **{#** and **#}**.
+   - Can also use the comment tag:
+
+```django
+1.
+{# this won't be rendered #}
+
+2.
+{% comment "Optional note" %}
+    <p>Commented out text with {{ create_date|date:"c" }}</p>
+{% endcomment %}
+```
+
+## 5. URL Management
+
+- To avoid hardcoded url, we use the tag **"url"**
+
+```django
+{# OLD: HARDCODED URL #}
+<li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>
+
+{# NEW: TAG URL #}
+<li><a href="{% url 'detail' question.id %}">{{ question.question_text }}</a></li>
+```
+
+- Name spacing URLs
+  - We add the variable "app_name" to the Polls/urls.py file to avoid mixup between apps.
+  - And then Change the reference URL
+
+```python
+# Polls/urls.py
+app_name = "polls"
+```
+
+```django
+{# OLD #}
+<li><a href="{% url 'detail' question.id %}">{{ question.question_text }}</a></li>
+
+{# NEW #}
+<li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
+```
+
+## 6. Generic Views
+
+https://docs.djangoproject.com/en/4.2/intro/tutorial04/
+
+```python
+
 ```
