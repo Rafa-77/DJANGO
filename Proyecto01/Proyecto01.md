@@ -562,6 +562,10 @@ app_name = "polls"
 
 ## 6. Generic Views
 
+1. Convert the URLconf.
+2. Delete some of the old, unneeded views.
+3. Introduce new views based on Django’s generic views.
+
 https://docs.djangoproject.com/en/4.2/intro/tutorial04/
 
 ```python
