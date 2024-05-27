@@ -25,7 +25,7 @@ pip install django
 ```bash
 # Asegurarse estar en el cd deseado
 django-admin startproject mysite
-# Ruta: http://127.0.0.1:8000/
+# Ruta:
 ```
 
 5. Correr server.
