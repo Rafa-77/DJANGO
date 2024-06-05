@@ -69,9 +69,14 @@ class Question(models.Model):
     def __str__(self):
         return self.question_text
 
-    # Un metodo (campo) interno
+    # 1ra Version: Un metodo (campo) interno
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
+
+    # 2da Version: correccion bug de publicaciones futuras
+    def was_published_recently(self):
+        now = timezone.now()
+        return now - datetime.timedelta(days=1) <= self.pub_date <= now
 
 
 class Choice(models.Model):
@@ -114,6 +119,7 @@ from django.urls import reverse
 
 from django.views import generic
 
+from django.utils import timezone
 
 ###########
 # Index
@@ -158,6 +164,16 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         """Return the last five published questions."""
         return Question.objects.order_by("-pub_date")[:5]
+
+# 5ta Version: Mejorar el get_queryset
+class IndexView(generic.ListView):
+    def get_queryset(self):
+        """
+        Return the last five published questions (not including those set to be
+        published in the future).
+        """
+        # __lte = Less Than or Equal
+        return Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:5]
 
 ###########
 # Detail:
@@ -608,13 +624,192 @@ app_name = "polls"
 <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
 ```
 
-## 6. Generic Views
+## 6. Testing
 
-1. Convert the URLconf.
-2. Delete some of the old, unneeded views.
-3. Introduce new views based on Django’s generic views.
+We have Identified a bug in the POLLS aplication:
 
-https://docs.djangoproject.com/en/4.2/intro/tutorial04/
+- Question.was_published_recently() method returns TRUE when the Question was published within the last day, but also if the field is in the future.
+
+## Steps:
+
+### 1. Confirm the bug in the shell
+
+```bash
+python manage.py shell
+```
+
+```python
+import datetime
+from django.utils import timezone
+from polls.models import Question
+# create a Question instance with pub_date 30 days in the future
+future_question = Question(pub_date=timezone.now() + datetime.timedelta(days=30))
+# Aply method to the new date: was it published recently?
+future_question.was_published_recently()
+# Returns: True
+```
+
+Future Publications are not recent.
+This is a bug.
+
+### 2. Create a test to expose the bug.
+
+- Turn what we just made in the shell into an automatic test.
+- Create the test in the file polls/test.py
+
+```python
+import datetime
+from django.test import TestCase
+from django.utils import timezone
+from .models import Question
+
+class QuestionModelTests(TestCase):
+    # Test Method
+    def test_was_published_recently_with_future_question(self):
+        """
+        was_published_recently() returns False for questions whose pub_date
+        is in the future.
+        """
+        time = timezone.now() + datetime.timedelta(days=30)
+        future_question = Question(pub_date=time)
+        # Should return false
+        # Raises an assertionError ir returns TRUE
+        self.assertIs(future_question.was_published_recently(), False)
+```
+
+### 3. Run the test in the terminal
+
+- manage.py test polls will look for test in the app
+- It will create a database for testing
+- It will look for TEST METHODS in the **subclass** of the class django.test.TestCase
+  - The TEST METHODS is the **"def"** function
+  - Its name should begin with **test** .
+- Informs us which test failed.
+
+```bash
+python manage.py test polls
+
+# Output:
+"""
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+F
+======================================================================
+FAIL: test_was_published_recently_with_future_question (polls.tests.QuestionModelTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/path/to/mysite/polls/tests.py", line 16, in test_was_published_recently_with_future_question
+    self.assertIs(future_question.was_published_recently(), False)
+AssertionError: True is not False
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...
+"""
+```
+
+### 4. Fix the bug
+
+- Fix the model in **models.py**
+- Run again the test, it should return this:
+
+```bash
+"""
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+OK
+Destroying test database for alias 'default'...
+"""
+```
+
+### 5. Add more tests.
+
+```python
+def test_was_published_recently_with_old_question(self):
+    """
+    was_published_recently() returns False for questions whose pub_date
+    is older than 1 day.
+    """
+    time = timezone.now() - datetime.timedelta(days=1, seconds=1)
+    old_question = Question(pub_date=time)
+    self.assertIs(old_question.was_published_recently(), False)
+
+
+def test_was_published_recently_with_recent_question(self):
+    """
+    was_published_recently() returns True for questions whose pub_date
+    is within the last day.
+    """
+    time = timezone.now() - datetime.timedelta(hours=23, minutes=59, seconds=59)
+    recent_question = Question(pub_date=time)
+    self.assertIs(recent_question.was_published_recently(), True)
+```
+
+## Django Test Client
+
+## Steps:
+
+The test Client is used to simulate user interacting with the code at the view level.
+
+### 1. Test the environment in the shell
+
+```bash
+python manage.py shell
+```
+
+The **setup_test_environment** installs a template renderer
+
+```python
+from django.test.utils import setup_test_environment
+setup_test_environment()
+```
+
+### 2. Test client
+
+Later on this import wont be necesary because **django.test.TestCase** has its own client.
+
+```python
+from django.test import Client
+# create an instance of the client for our use
+client = Client()
+```
+
+Ask the client to do some work:
+
+```python
+# get a response from '/'
+response = client.get("/")
+# Result: Not Found: /
+
+response.status_code # we should expect a 404 from that address
+# Result: 404
+
+# We should expect to find something at '/polls/'
+from django.urls import reverse
+response = client.get(reverse("polls:index"))
+response.status_code
+# Result: 200
+
+response.content
+# Result: b'\n    <ul>\n    \n        <li><a href="/polls/1/">What&#x27;s up?</a></li>\n    \n    </ul>\n\n'
+
+response.context["latest_question_list"]
+# Result: <QuerySet [<Question: What's up?>]>
+```
+
+---
+
+---
+
+---
+
+---
 
 ```python
 
