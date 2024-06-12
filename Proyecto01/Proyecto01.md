@@ -1062,7 +1062,7 @@ TEMPLATES = [{"DIRS": [BASE_DIR / "templates"]}
 {% block nav-global %}{% endblock %}
 ```
 
-## 9. Third-party packages
+## 9. Third-party packages: Debug toolbar
 
 ```python
 
