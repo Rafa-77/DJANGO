@@ -3,10 +3,10 @@ from .models import Question, Choice
 
 classes = ["collapse", "wide", "extrapretty"]
 
-class ChoiceInline(admin.StackedInline):
+class ChoiceInline(admin.TabularInline):
     model = Choice
-    # Provide fields for 3 choices
-    extra = 3
+    # Provide fields for # extra choices
+    extra = 1
 
 
 class QuestionAdmin(admin.ModelAdmin):
@@ -22,19 +22,12 @@ class QuestionAdmin(admin.ModelAdmin):
     ]
     # Objects of the model "Choice" are edited on the Question admin page
     inlines = [ChoiceInline]
+    # Which field are displayed con the change lsita page of admin, if not specified it will display a single columns with __str__()
+    list_display = ["question_text", "pub_date", "was_published_recently"]
+    # Add a Filter sidebar
+    list_filter = ["pub_date"]
+    # Search Box at the top of the list
+    search_fields = ["question_text"]
 
 
 admin.site.register(Question, QuestionAdmin)
-
-# Esto no se utiliza porque se ponen los objetos de Choice dentro de Question con el INLINE
-
-# class ChoiceAdmin(admin.ModelAdmin):
-#     fieldsets = [
-#         # Foreign Keys are in a Select box always
-#         (None, {"fields": ["question"]}),
-#         (None, {"classes": ["collapse"],"fields": ["choice_text"]}),
-#         (None, {"fields": ["votes"]}),
-#     ]
-
-# admin.site.register(Choice, ChoiceAdmin)
-

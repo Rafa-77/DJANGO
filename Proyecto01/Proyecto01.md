@@ -1012,12 +1012,57 @@ class QuestionAdmin(admin.ModelAdmin):
 
 admin.site.register(Question, QuestionAdmin)
 
+
+#############
+# 5th version
+#############
+
+# Para mostrar los datos en forma tabular
+class ChoiceInline(admin.TabularInline):
+    model = Choice
+    # Provide fields for # choices
+    extra = 1
+
+class QuestionAdmin(admin.ModelAdmin):
+    # ...
+
+    # Which field are displayed con the change lsita page of admin, if not specified it will display a single columns with __str__()
+    list_display = ["question_text", "pub_date", "was_published_recently"]
+    # Add a Filter sidebar
+    list_filter = ["pub_date"]
+
 ```
 
 Pattern for admin forms:
 
 1. Create a model admin class.
 2. Pass the class as the 2nd argument in the **admin.site.register()**
+
+Add templates to the admin page.
+
+```python
+# mysite/settings.py
+# Make shure your  file has this:
+TEMPLATES = [{"DIRS": [BASE_DIR / "templates"]}
+```
+
+```python
+# \mysite\templates\admin\base_site.html
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></div>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+```
+
+## 9. Third-party packages
 
 ```python
 
