@@ -4,6 +4,7 @@ from . import views
 # NameSpacing URL
 app_name = "polls"
 
+# Admin default path (starts not with app): /admin/
 urlpatterns = [
     # /polls/
     path("", views.IndexView.as_view(), name="index"),
