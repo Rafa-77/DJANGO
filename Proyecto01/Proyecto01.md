@@ -1062,8 +1062,37 @@ TEMPLATES = [{"DIRS": [BASE_DIR / "templates"]}
 {% block nav-global %}{% endblock %}
 ```
 
-## 9. Third-party packages: Debug toolbar
+## Final App Layout
 
-```python
-
-```
+mysite/
+manage.py
+mysite/
+**init**.py
+settings.py
+urls.py
+asgi.py
+wsgi.py
+polls/
+**init**.py
+admin.py
+apps.py
+migrations/
+**init**.py
+0001_initial.py
+models.py
+static/
+polls/
+images/
+background.gif
+style.css
+templates/
+polls/
+detail.html
+index.html
+results.html
+tests.py
+urls.py
+views.py
+templates/
+admin/
+base_site.html
