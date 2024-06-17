@@ -24,11 +24,17 @@ npm create vite@latest
 ```bash
 cd React-01
 npm install
+npm i bootstrap
 npm run dev
 ```
 
 - Open address http://localhost:5173/ on web browser.
 
 4. Create react component.
+
    - Create y Modify file **\Proyecto01\React-01\src\Message.tsx**.
-   - Modify the file **\Proyecto01\React-01\src\App.tsx**.
+     - Import it in the file **\Proyecto01\React-01\src\App.tsx**.
+
+5. Create react List component.
+   - Create y Modify file **\Proyecto01\React-01\src\components\listGroup.tsx**.
+     - Import it in the file **\Proyecto01\React-01\src\App.tsx**.
