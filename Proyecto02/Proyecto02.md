@@ -17,10 +17,13 @@
 
 ## Instructions:
 
+## Backend:
+
+0. cd D:\alex\_\Documents\Programacion\DJANGO\Proyecto02
 1. Create/connect venv.
 2. Install the requirements.txt
    - If using conda use conda-forge
-3. Create new Django Project.
+3. Create new Django Project in \Proyecto02\backend
    - django-admin startproject backend
 4. Create app
    - python manage.py startapp api
@@ -76,5 +79,16 @@ CORS_ALLOWS_CREDENTIALS = True
 
 6. Create & modify the **api/serializers.py** file
 7. Modify the **api/views.py** file
-8. Modify the **backend/urls.py** file
-9. Run migrations.
+8. Create & modify the **api/urls.py** file
+9. Modify the **backend/urls.py** file
+   - Include urls from the **api/urls.py** file.
+10. Run migrations.
+11. Create Models in **api/models.py** file
+    - Make serializer for the model
+
+## Frontend:
+
+0. cd D:\alex\_\Documents\Programacion\DJANGO\Proyecto02
+1. npm create vite@latest frontend -- --template react
+2. install packages: - conda install -c conda-forge nodejs=18 - npm install axios react-router-dom jwt-decode -
+   \Proyecto02\frontend
