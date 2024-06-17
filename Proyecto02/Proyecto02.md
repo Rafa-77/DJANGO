@@ -89,6 +89,16 @@ CORS_ALLOWS_CREDENTIALS = True
 ## Frontend:
 
 0. cd D:\alex\_\Documents\Programacion\DJANGO\Proyecto02
-1. npm create vite@latest frontend -- --template react
-2. install packages: - conda install -c conda-forge nodejs=18 - npm install axios react-router-dom jwt-decode -
-   \Proyecto02\frontend
+1. Create react project
+
+```bash
+npm create vite@latest frontend -- --template react
+```
+
+2. install packages:
+
+```bash
+conda install -c conda-forge nodejs=18 - npm install axios react-router-dom jwt-decode
+```
+
+3. \Proyecto02\frontend
