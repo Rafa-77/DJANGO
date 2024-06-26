@@ -21,13 +21,20 @@
 // export default App;
 
 // Button
+import { useState } from "react";
 import Button from "./components/Button";
+import Alert from "./components/Alert_button";
 
 function App() {
+  const [alertVisible, setAlertVisibility] = useState(false);
+
   return (
     <div>
-      <Button color="secondary" onClick={() => console.log("Clicled")}>
-        Label
+      {alertVisible && (
+        <Alert onClose={() => setAlertVisibility(false)}>My alert</Alert>
+      )}
+      <Button color="secondary" onClick={() => setAlertVisibility(true)}>
+        Label-button01
       </Button>
     </div>
   );
