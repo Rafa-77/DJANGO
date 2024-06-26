@@ -101,4 +101,14 @@ npm create vite@latest frontend -- --template react
 conda install -c conda-forge nodejs=18 - npm install axios react-router-dom jwt-decode
 ```
 
-3. \Proyecto02\frontend
+3. cd \Proyecto02\frontend
+4. Create auxiliary dirs in src dir.
+
+- components:
+  - ProtectedRoute
+- pages:
+- styles:
+
+5. Create ".env" file in frontend dir.
+6. Create constants.js and api.js files.
+7. Modify App.jsx and main.jsx
