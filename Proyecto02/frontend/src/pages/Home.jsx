@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../api";
+import Note from "../components/Note"
 
 function Home() {
   const [notes, setNotes] = useState([]);
@@ -21,7 +22,61 @@ function Home() {
       .catch((err) => alert(err));
   };
 
-  return <div>HOME</div>;
+  const deleteNote = (id) => {
+    api
+      .delete(`/api/notes/delete/${id}/`)
+      .then((res) => {
+        if (res.status === 204) alert("Note deleted");
+        else alert("Failed to delete note.");
+        getNotes();
+      })
+      .catch((err) => alert(err));
+    
+  };
+
+  const createNote = (e) => {
+    e.preventDefault();
+    api
+      .post("/api/notes/", { content, title })
+      .then((res) => {
+        if (res.status === 201) alert("Note created");
+        else alert("Failed to create note.");
+        getNotes();
+      })
+      .catch((err) => aletr(err));
+    
+  };
+  return (
+  <div>
+    <div>
+      <h2>Notes</h2>
+      {notes.map((note) => <Note note={note} onDelete={deleteNote} key={note.id}/>)}
+    </div>
+    <form onSubmit={createNote}>
+      <label htmlFor="title">Titulo:</label>
+      <br />
+      <input
+        type="text"
+        id="title"
+        name="title"
+        required
+        onChange={(e) => setTitle(e.target.value)}
+        value={title}
+      />
+      <label htmlFor="content">Content:</label>
+      <br />
+      <textarea
+        id="content"
+        name="content"
+        required
+        onChange={(e) => setContent(e.target.value)}
+        value={content}
+      ></textarea>
+      <br />
+      <input type="submit" value="Submit"></input>
+    </form>
+  </div>
+  );
 }
 
 export default Home;
