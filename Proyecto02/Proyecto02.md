@@ -112,3 +112,70 @@ conda install -c conda-forge nodejs=18 - npm install axios react-router-dom jwt-
 5. Create ".env" file in frontend dir.
 6. Create constants.js and api.js files.
 7. Modify App.jsx and main.jsx
+
+## Deployment:
+
+We need to deploy de database, the backend and the frontend.
+We will use Choreo for this.
+
+1. **Deploy database:**
+
+- https://console.choreo.dev/organizations/ramvsoft/dependencies/databases
+- Create.
+- PostgreSQL
+- NOTE: The database will be powered off every hour in the free version.
+- Copy all the information in an environment variable file.
+
+```python
+DB_HOST=""
+DB_PORT=
+DB_USER=""
+DB_NAME=""
+DB_PWD=""
+```
+
+2. **Connect DB in Choreo with Django.**
+
+- \backend\backend\settings.py
+
+```python
+# Original
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# New
+load_dotenv()
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT"),
+        'USER': os.getenv("DB_USER"),
+        'NAME': os.getenv("DB_NAME"),
+        'PASSWORD': os.getenv("DB_PWD"),
+    }
+}
+```
+
+- Run migrations
+
+**4. Deploy Configuration**
+
+- Make a git repository.
+- Remember to gitignore the env.
+- Make deployment oriented files-
+  - endpoints.yaml and procfile
+- in \Proyecto02 run:
+
+```bash
+git init
+git add .
+git commit -m "fist commit"
+git branch -M main
+git remote add origin https://github.com/Rafa-77/Proyecto02.git
+git push -u origin main
+```
