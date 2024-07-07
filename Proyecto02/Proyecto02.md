@@ -223,3 +223,5 @@ git push -u origin main
       - Copy service URL
         - Paste in \frontend\src\api.js
       - Push in git
+      - Build Latest
+      - Redeploy
