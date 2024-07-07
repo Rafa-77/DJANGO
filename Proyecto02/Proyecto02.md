@@ -179,3 +179,47 @@ git branch -M main
 git remote add origin https://github.com/Rafa-77/Proyecto02.git
 git push -u origin main
 ```
+
+**5. Choreo Proyect Setup**
+
+- Choreo Overview Tab
+- Create Project
+- Create back end service for the Rest API
+  - python
+- Create front end web APP
+  - React
+  - Build command: npm install && npm run build
+  - Buid path: /dist
+
+**5. Backend Deplayment**
+
+- Build tab
+  - Build Latest
+- Deploy tab
+  - Configure deploy
+  - Deploy
+  - Manage Configs and Secrets
+    - Create secret and environment variable
+      - Copy and contents of the env file to this variables, without quotation marks
+- Endpoint configurations
+  - API visibility: Public
+  - Dissalbe security scheme
+
+**6. Frontend deployment**
+
+- Build tab
+  - Build Latest
+- Deploy tab
+
+  - Authentication Settings - Dissable managed auth with choreo -
+    **7. Connect Frontend and Backend**
+
+- Frontend
+  - Dependencies tab
+    - Connections
+      - Create
+      - Backend Rest API
+      - NOTE: Steps on the right hand are for the choreo auth
+      - Copy service URL
+        - Paste in \frontend\src\api.js
+      - Push in git
